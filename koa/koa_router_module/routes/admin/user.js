@@ -61,22 +61,42 @@ router.get("/", async ctx => {
   ctx.body = result
 })
 
-router.get("/add", async ctx => {
+router.post("/add", async ctx => {
   // Use connect method to connect to the server
-  MongoClient.connect(
-    url,
-    {
-      useUnifiedTopology: true,
-      useNewUrlParser: true
-    },
-    function(err, client) {
-      assert.equal(null, err)
-      const db = client.db(dbName)
-      insertDocuments(db, function() {
-        client.close()
-      })
-    }
-  )
+  let res = new Promise(function(resolve, reject) {
+    MongoClient.connect(
+      url,
+      {
+        useUnifiedTopology: true,
+        useNewUrlParser: true
+      },
+      function(err, client) {
+        assert.equal(null, err)
+        const db = client.db(dbName)
+
+        const collection = db.collection("web")
+        // Insert some documents
+        collection.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }], function(
+          err,
+          result
+        ) {
+          assert.equal(err, null)
+          resolve(result)
+        })
+      }
+    )
+  })
+
+  let result = await res
+    .then(function(data) {
+      //处理业务
+      return data
+    })
+    .catch(function(errMsg) {
+      //失败业务
+    })
+
+  ctx.body = `添加数据成功，共添加${result.result.n}条数据`
 })
 
 router.get("/edit", async ctx => {
