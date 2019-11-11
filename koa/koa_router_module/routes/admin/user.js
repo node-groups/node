@@ -23,7 +23,7 @@ const findDocuments = function(db, callback) {
   const collection = db.collection("web")
   // Find some documents
   collection.find({}).toArray(function(err, data) {
-    assert.equal(err, null)
+    assert.equal(err, null) // 如果是err,则返回错误
     callback(data)
   })
 }
