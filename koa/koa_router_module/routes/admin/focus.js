@@ -1,13 +1,21 @@
 /*轮播图的增加修改删除*/
 let router = require("koa-router")()
 let MongoClient = require("mongodb").MongoClient
+let fs = require("fs")
+let path = require("path")
 //
 const ObjectId = require("mongodb").ObjectId
+
 let assert = require("assert")
 let url = "mongodb://127.0.0.1:27017"
 
 // Database Name
 const dbName = "test666"
+
+const getUploadFileExt = require("../../utils/getUploadFileExt")
+const getUploadFileName = require("../../utils/getUploadFileName")
+const checkDirExist = require("../../utils/checkDirExist")
+const getUploadDirName = require("../../utils/getUploadDirName")
 
 // 查询数据
 let findData = function(db, find_params, callback) {
@@ -78,7 +86,6 @@ router.get("/", async ctx => {
   // console.log(typeof(ctx.querystring)) // string
   // console.log(ctx.querystring) // "a=6666&b=8888"
 
-  //
   let res = new Promise(function(resolve, reject) {
     MongoClient.connect(
       url,
@@ -145,6 +152,7 @@ router.post("/add", async ctx => {
 
 // PUT 修改 （动态路由）
 router.put("/edit/:_id", async ctx => {
+  console.log("edit")
   // 确定要修改哪一条数据
   let focus_id = ctx.params
   // 将对应的数据修改为某个值
@@ -207,6 +215,53 @@ router.delete("/delete/:_id", async ctx => {
     .catch(function(errMsg) {})
 
   ctx.body = { status: 201, message: "delete success" }
+})
+
+// upload 上传单个文件
+router.post("/uploadFile", async ctx => {
+  let file = ctx.request.files.file // 获取上传文件
+  // console.log(666);
+  // console.log(typeof file);
+  // console.log(file);
+  // console.log(file.name);
+  // 创建可读流
+  const reader = fs.createReadStream(file.path)
+  // 获取上传文件扩展名
+  let filePath =
+    path.join(__dirname, "../../", "static/image") + `/${file.name}`
+  // 创建可写流
+  const upStream = fs.createWriteStream(filePath)
+  // 可读流通过管道写入可写流
+  reader.pipe(upStream)
+  ctx.body = {
+    status: 201,
+    message: "upload success",
+    data: { url: filePath }
+  }
+})
+
+// upload 上传多个文件
+router.post("/uploadFiles", async ctx => {
+  // 获取上传文件
+  const files = ctx.request.files.file
+  let filePaths = []
+  for (let file of files) {
+    // 创建可读流
+    const reader = fs.createReadStream(file.path)
+    // 获取上传文件扩展名
+    let filePath =
+      path.join(__dirname, "../../", "static/image") + `/${file.name}`
+    filePaths.push(filePath)
+    // 创建可写流
+    const upStream = fs.createWriteStream(filePath)
+    // 可读流通过管道写入可写流
+    reader.pipe(upStream)
+  }
+  ctx.body = {
+    status: 201,
+    message: "upload success",
+    data: { url: filePaths }
+  }
 })
 
 module.exports = router.routes()

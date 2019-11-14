@@ -1,7 +1,7 @@
 
 var router = require("koa-router")()
 
-router.get("/", async ctx => {
+router.get("/entry", async ctx => {
   ctx.body = "项目入口"
 })
 //注意 前台后后台匹配路由的写法不一样

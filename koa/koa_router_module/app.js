@@ -1,7 +1,15 @@
 const Koa = require("koa"),
   router = require("koa-router")(),
   path = require("path"),
-  bodyParser = require("koa-bodyparser")
+  bodyParser = require("koa-bodyparser"),
+  koaBody = require("koa-body"),
+  static = require("koa-static"),
+  staticPath = "./static" // 静态资源目录对于相对入口文件index.js的路径
+
+const getUploadFileExt = require("./utils/getUploadFileExt")
+const getUploadFileName = require("./utils/getUploadFileName")
+const checkDirExist = require("./utils/checkDirExist")
+const getUploadDirName = require("./utils/getUploadDirName")
 
 //引入子模块
 
@@ -10,9 +18,22 @@ var api = require("./routes/api.js")
 var index = require("./routes/index.js")
 
 var app = new Koa()
-app.use(bodyParser())
+app.use(bodyParser()) // 处理post请求
+app.use(static(path.join(__dirname, staticPath))) // 静态资源对应文件夹
+app.use(
+  koaBody({
+    multipart: true,
+    formidable: {
+      maxFileSize: 2 * 100 * 1024 // 设置上传文件大小最大限制，默认2M
+    }
+    // onError: err => {
+    //   // console.log(888)
+    //   // console.log(err.response)
+    // }
+  })
+)
 
-//配置路由 (首页的路由，访问链接对应：http://localhost:8008/)
+//配置路由 (首页的路由，同时也是项目默认访问的路由，默认访问链接对应：http://localhost:8008/)
 router.use(index)
 /*
   /admin   配置子路由  层级路由
