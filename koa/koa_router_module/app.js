@@ -21,6 +21,7 @@ app.use(
     formidable: {
       maxFileSize: 2 * 100 * 1024 // 设置上传文件大小最大限制，默认2M
     }
+    // 上传失败的回调
     // onError: err => {
     //   // console.log(888)
     //   // console.log(err.response)
