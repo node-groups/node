@@ -6,11 +6,6 @@ const Koa = require("koa"),
   static = require("koa-static"),
   staticPath = "./static" // 静态资源目录对于相对入口文件index.js的路径
 
-const getUploadFileExt = require("./utils/getUploadFileExt")
-const getUploadFileName = require("./utils/getUploadFileName")
-const checkDirExist = require("./utils/checkDirExist")
-const getUploadDirName = require("./utils/getUploadDirName")
-
 //引入子模块
 
 var admin = require("./routes/admin.js")

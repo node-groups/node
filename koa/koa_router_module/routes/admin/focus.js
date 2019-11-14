@@ -12,11 +12,6 @@ let url = "mongodb://127.0.0.1:27017"
 // Database Name
 const dbName = "test666"
 
-const getUploadFileExt = require("../../utils/getUploadFileExt")
-const getUploadFileName = require("../../utils/getUploadFileName")
-const checkDirExist = require("../../utils/checkDirExist")
-const getUploadDirName = require("../../utils/getUploadDirName")
-
 // 查询数据
 let findData = function(db, find_params, callback) {
   // Get the Data collection
@@ -152,7 +147,6 @@ router.post("/add", async ctx => {
 
 // PUT 修改 （动态路由）
 router.put("/edit/:_id", async ctx => {
-  console.log("edit")
   // 确定要修改哪一条数据
   let focus_id = ctx.params
   // 将对应的数据修改为某个值
@@ -220,10 +214,6 @@ router.delete("/delete/:_id", async ctx => {
 // upload 上传单个文件
 router.post("/uploadFile", async ctx => {
   let file = ctx.request.files.file // 获取上传文件
-  // console.log(666);
-  // console.log(typeof file);
-  // console.log(file);
-  // console.log(file.name);
   // 创建可读流
   const reader = fs.createReadStream(file.path)
   // 获取上传文件扩展名
@@ -257,6 +247,33 @@ router.post("/uploadFiles", async ctx => {
     // 可读流通过管道写入可写流
     reader.pipe(upStream)
   }
+
+  let add_params = {url: filePaths}
+  let res = new Promise(function(resolve, reject) {
+    MongoClient.connect(
+      url,
+      {
+        useUnifiedTopology: true,
+        useNewUrlParser: true
+      },
+      function(err, client) {
+        assert.equal(null, err)
+        const db = client.db(dbName)
+        // 调用方法，插入数据
+        insertData(db, add_params, function(result) {
+          client.close()
+          resolve(result)
+        })
+      }
+    )
+  })
+
+  let result = await res
+    .then(function(data) {
+      return data
+    })
+    .catch(function(errMsg) {})
+
   ctx.body = {
     status: 201,
     message: "upload success",
